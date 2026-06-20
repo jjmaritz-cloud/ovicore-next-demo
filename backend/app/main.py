@@ -14,6 +14,8 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000",
         "http://127.0.0.1:3000",
+        "https://ovicore-next-demo.vercel.app",
+        "https://ovicore-next-demo-pmf6lq8omc-ovi-core.vercel.app",
         "https://demo.ovicore.com.au",
         "https://app.ovicore.com.au",
     ],
