@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>OviCore — Excel-like Daily Production Entry</title>
+<style>
+  :root{
+    --bg:#eef2f6;
+    --panel:#ffffff;
+    --ink:#111827;
+    --muted:#667085;
+    --line:#d7dce3;
+    --line2:#c6ccd5;
+    --head:#f3f6f9;
+    --head2:#e8eef4;
+    --brand:#0f3d35;
+    --brand2:#146b55;
+    --accent:#d6a63a;
+    --selected:#dff4ec;
+    --edit:#fffdf3;
+    --green:#e8f7ee;
+    --green-text:#166534;
+    --amber:#fff5e5;
+    --amber-text:#9a4b00;
+    --red:#fff0f0;
+    --red-text:#a31b1b;
+    --blue:#eaf2ff;
+    --shadow:0 18px 45px rgba(16,24,40,.10);
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    background:linear-gradient(180deg,#f7fafc 0%,#e8eef4 100%);
+    color:var(--ink);
+  }
+  .layout{
+    display:grid;
+    grid-template-columns:72px minmax(0,1fr);
+    min-height:100vh;
+  }
+  .rail{
+    background:#0b2f29;
+    color:white;
+    padding:14px 10px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:10px;
+    box-shadow:8px 0 22px rgba(15,23,42,.18);
+    z-index:10;
+  }
+  .mark{
+    width:44px;height:44px;border-radius:14px;
+    background:linear-gradient(135deg,#4ac59b,#f0c455);
+    color:#0b2f29;
+    display:flex;align-items:center;justify-content:center;
+    font-weight:900;font-size:22px;
+    margin-bottom:12px;
+  }
+  .rail-btn{
+    width:46px;height:46px;border-radius:14px;
+    display:flex;align-items:center;justify-content:center;
+    color:rgba(255,255,255,.72);
+    font-size:19px;
+    cursor:pointer;
+  }
+  .rail-btn.active{
+    background:rgba(255,255,255,.14);
+    color:white;
+    box-shadow:inset 3px 0 0 #69d7ae;
+  }
+  .main{
+    min-width:0;
+    display:flex;
+    flex-direction:column;
+  }
+  .topbar{
+    height:64px;
+    background:rgba(255,255,255,.92);
+    backdrop-filter: blur(14px);
+    border-bottom:1px solid var(--line);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 22px;
+    position:sticky;
+    top:0;
+    z-index:9;
+  }
+  .brand-title{
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .brand-title h1{
+    margin:0;
+    font-size:18px;
+    letter-spacing:-.02em;
+  }
+  .crumb{
+    color:var(--muted);
+    font-size:12px;
+    margin-top:2px;
+  }
+  .right-tools{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .avatar{
+    width:34px;height:34px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    background:#dff4ec;color:#0f3d35;font-weight:900;
+  }
+  .page{
+    padding:18px 20px 28px;
+    min-width:0;
+  }
+  .sheet-shell{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:18px;
+    box-shadow:var(--shadow);
+    overflow:hidden;
+  }
+  .sheet-titlebar{
+    background:linear-gradient(135deg,#103e35,#176b55);
+    color:white;
+    padding:14px 16px;
+    display:flex;
+    justify-content:space-between;
+    gap:16px;
+    align-items:center;
+  }
+  .sheet-titlebar h2{
+    margin:0;
+    font-size:20px;
+    letter-spacing:-.02em;
+  }
+  .sheet-titlebar p{
+    margin:4px 0 0;
+    color:rgba(255,255,255,.72);
+    font-size:13px;
+  }
+  .title-actions{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex-wrap:wrap;
+    justify-content:flex-end;
+  }
+  .btn{
+    border:0;
+    border-radius:10px;
+    padding:8px 11px;
+    font-size:13px;
+    font-weight:800;
+    cursor:pointer;
+    background:white;
+    color:#103e35;
+  }
+  .btn.dark{
+    background:rgba(255,255,255,.12);
+    color:white;
+    border:1px solid rgba(255,255,255,.2);
+  }
+  .toolbar{
+    background:#f8fafc;
+    border-bottom:1px solid var(--line);
+    padding:10px 12px;
+    display:grid;
+    grid-template-columns: repeat(6, minmax(120px,1fr));
+    gap:8px;
+  }
+  .tool-field{
+    background:white;
+    border:1px solid var(--line);
+    border-radius:11px;
+    padding:7px 9px;
+  }
+  .tool-field label{
+    display:block;
+    font-size:10px;
+    color:#667085;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    font-weight:800;
+    margin-bottom:3px;
+  }
+  .tool-field select,.tool-field input{
+    width:100%;
+    border:0;
+    outline:0;
+    background:transparent;
+    font-weight:800;
+    font-size:13px;
+    color:#111827;
+  }
+  .metric-strip{
+    display:grid;
+    grid-template-columns:repeat(6,minmax(130px,1fr));
+    gap:0;
+    border-bottom:1px solid var(--line);
+    background:white;
+  }
+  .metric{
+    padding:10px 14px;
+    border-right:1px solid var(--line);
+  }
+  .metric:last-child{border-right:0}
+  .metric span{
+    display:block;
+    color:var(--muted);
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.07em;
+    font-weight:800;
+  }
+  .metric strong{
+    display:block;
+    font-size:20px;
+    margin-top:2px;
+    letter-spacing:-.03em;
+  }
+  .formula-bar{
+    display:grid;
+    grid-template-columns:52px 1fr;
+    border-bottom:1px solid var(--line);
+    background:#fbfcfe;
+    align-items:center;
+  }
+  .name-box{
+    border-right:1px solid var(--line);
+    padding:8px 10px;
+    color:#475467;
+    font-size:12px;
+    font-weight:900;
+    text-align:center;
+  }
+  .formula{
+    padding:8px 12px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size:12px;
+    color:#344054;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .grid-wrap{
+    overflow:auto;
+    max-height:calc(100vh - 276px);
+    position:relative;
+    background:white;
+  }
+  table{
+    border-collapse:separate;
+    border-spacing:0;
+    width:1780px;
+    font-size:12.5px;
+  }
+  th,td{
+    border-right:1px solid var(--line);
+    border-bottom:1px solid var(--line);
+    padding:0;
+    height:34px;
+    white-space:nowrap;
+  }
+  thead th{
+    position:sticky;
+    background:var(--head);
+    z-index:4;
+    text-align:center;
+    color:#344054;
+    font-weight:900;
+  }
+  thead tr.group th{
+    top:0;
+    height:30px;
+    background:#dfe8f0;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    border-bottom:1px solid var(--line2);
+  }
+  thead tr.cols th{
+    top:30px;
+    height:38px;
+    font-size:11px;
+    background:#f7f9fb;
+    vertical-align:middle;
+  }
+  .corner{
+    left:0;
+    z-index:8!important;
+    background:#edf2f7!important;
+    width:42px;
+  }
+  .rownum{
+    position:sticky;
+    left:0;
+    z-index:3;
+    width:42px;
+    background:#f7f9fb;
+    color:#667085;
+    text-align:center;
+    font-weight:800;
+  }
+  .sticky1{
+    position:sticky;
+    left:42px;
+    z-index:3;
+    background:white;
+    width:98px;
+  }
+  .sticky2{
+    position:sticky;
+    left:140px;
+    z-index:3;
+    background:white;
+    width:96px;
+  }
+  .sticky3{
+    position:sticky;
+    left:236px;
+    z-index:3;
+    background:white;
+    width:92px;
+  }
+  thead .sticky1, thead .sticky2, thead .sticky3{
+    z-index:7;
+    background:#f7f9fb!important;
+  }
+  thead tr.group .sticky1, thead tr.group .sticky2, thead tr.group .sticky3{
+    background:#dfe8f0!important;
+  }
+  td.sticky1,td.sticky2,td.sticky3{
+    font-weight:800;
+    padding:0 8px;
+  }
+  .text-cell{
+    padding:0 8px;
+  }
+  .calc-cell{
+    padding:0 8px;
+    text-align:right;
+    font-weight:800;
+    background:#fcfcfd;
+  }
+  .input-cell{
+    width:100%;
+    height:33px;
+    border:0;
+    outline:0;
+    background:var(--edit);
+    padding:0 8px;
+    text-align:right;
+    font:inherit;
+    font-weight:750;
+  }
+  .input-cell.text{
+    text-align:left;
+    width:100%;
+  }
+  .input-cell:focus{
+    background:white;
+    box-shadow: inset 0 0 0 2px #1f7a5c;
+  }
+  tbody tr:hover td,
+  tbody tr:hover .sticky1,
+  tbody tr:hover .sticky2,
+  tbody tr:hover .sticky3{
+    background:#f6fbf8;
+  }
+  .selected-row td,
+  .selected-row .sticky1,
+  .selected-row .sticky2,
+  .selected-row .sticky3{
+    background:var(--selected)!important;
+  }
+  .warn{
+    background:#fff2d5!important;
+  }
+  .bad{
+    background:#ffe5e5!important;
+  }
+  .ok{
+    color:var(--green-text);
+  }
+  .status{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:100%;
+    height:100%;
+    font-weight:900;
+    font-size:11px;
+  }
+  .status.saved{background:var(--green);color:var(--green-text)}
+  .status.review{background:var(--amber);color:var(--amber-text)}
+  .status.missing{background:var(--red);color:var(--red-text)}
+  .status.locked{background:#eef2f7;color:#475467}
+  .section-layer{
+    background:#eaf7f1!important;
+  }
+  .section-production{
+    background:#eaf2ff!important;
+  }
+  .section-review{
+    background:#fff7e6!important;
+  }
+  .sheet-footer{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    padding:10px 12px;
+    border-top:1px solid var(--line);
+    background:#f8fafc;
+    color:#667085;
+    font-size:12px;
+  }
+  .tabs{
+    display:flex;
+    gap:6px;
+  }
+  .tab{
+    border:1px solid var(--line);
+    background:white;
+    color:#344054;
+    padding:7px 12px;
+    border-radius:10px;
+    font-weight:900;
+  }
+  .tab.active{
+    background:#0f3d35;
+    color:white;
+    border-color:#0f3d35;
+  }
+  .legend{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    flex-wrap:wrap;
+  }
+  .dot{
+    width:9px;height:9px;border-radius:50%;
+    display:inline-block;
+    margin-right:5px;
+  }
+  .dot.green{background:#22c55e}
+  .dot.amber{background:#f59e0b}
+  .dot.red{background:#ef4444}
+  .col-w-sm{width:78px}
+  .col-w-md{width:92px}
+  .col-w-lg{width:120px}
+  .col-w-xl{width:190px}
+  @media (max-width:1100px){
+    .toolbar{grid-template-columns:repeat(3,minmax(120px,1fr))}
+    .metric-strip{grid-template-columns:repeat(3,minmax(130px,1fr))}
+  }
+  @media (max-width:720px){
+    .layout{grid-template-columns:1fr}
+    .rail{display:none}
+    .page{padding:12px}
+    .topbar{height:auto;padding:12px;align-items:flex-start}
+    .toolbar{grid-template-columns:1fr 1fr}
+    .metric-strip{grid-template-columns:1fr 1fr}
+    .right-tools{display:none}
+    .sheet-titlebar{flex-direction:column;align-items:flex-start}
+    .grid-wrap{max-height:62vh}
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="rail">
+    <div class="mark">O</div>
+    <div class="rail-btn">⌂</div>
+    <div class="rail-btn active">▦</div>
+    <div class="rail-btn">◷</div>
+    <div class="rail-btn">⌁</div>
+    <div class="rail-btn">◇</div>
+    <div class="rail-btn">☑</div>
+    <div style="flex:1"></div>
+    <div class="rail-btn">⚙</div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="brand-title">
+        <div>
+          <h1>OviCore Production</h1>
+          <div class="crumb">Production / Daily Entry / Layer operations</div>
+        </div>
+      </div>
+      <div class="right-tools">
+        <button class="btn" style="border:1px solid var(--line);box-shadow:none;">Export CSV</button>
+        <button class="btn" style="background:#0f3d35;color:white;">Save changes</button>
+        <div class="avatar">JJ</div>
+      </div>
+    </header>
+
+    <main class="page">
+      <section class="sheet-shell">
+        <div class="sheet-titlebar">
+          <div>
+            <h2>Daily Production Entry</h2>
+            <p>Excel-style grid with frozen identifiers, grouped production fields, live calculations and row-level validation.</p>
+          </div>
+          <div class="title-actions">
+            <button class="btn dark" onclick="copyYesterday()">Copy yesterday</button>
+            <button class="btn dark" onclick="showMissing()">Missing only</button>
+            <button class="btn dark" onclick="showReview()">Review only</button>
+            <button class="btn" onclick="saveAll()">Save all rows</button>
+          </div>
+        </div>
+
+        <div class="toolbar">
+          <div class="tool-field"><label>Company</label><select><option>Pace Farms</option></select></div>
+          <div class="tool-field"><label>Farm</label><select><option>Beresfield Farm 1</option><option>Hanwood Farm 2</option></select></div>
+          <div class="tool-field"><label>Entry date</label><input type="date" value="2026-06-19"></div>
+          <div class="tool-field"><label>Week ending</label><input value="Sunday, 21 Jun 2026" readonly></div>
+          <div class="tool-field"><label>Production type</label><select><option>Layers</option><option>Breeders</option></select></div>
+          <div class="tool-field"><label>Grid view</label><select onchange="filterStatus(this.value)"><option value="all">All active rows</option><option value="missing">Missing only</option><option value="review">Review suggested</option><option value="saved">Saved only</option></select></div>
+        </div>
+
+        <div class="metric-strip">
+          <div class="metric"><span>Progress</span><strong id="kpiProgress">0 / 0</strong></div>
+          <div class="metric"><span>Total eggs</span><strong id="kpiEggs">0</strong></div>
+          <div class="metric"><span>Avg hen day</span><strong id="kpiHenDay">0.0%</strong></div>
+          <div class="metric"><span>Avg FCR / dozen</span><strong id="kpiFcr">0.00</strong></div>
+          <div class="metric"><span>Review suggested</span><strong id="kpiReview">0</strong></div>
+          <div class="metric"><span>Missing rows</span><strong id="kpiMissing">0</strong></div>
+        </div>
+
+        <div class="formula-bar">
+          <div class="name-box" id="nameBox">J6</div>
+          <div class="formula" id="formulaBar">Hen day % = Total eggs ÷ Closing birds × 100</div>
+        </div>
+
+        <div class="grid-wrap">
+          <table>
+            <thead>
+              <tr class="group">
+                <th class="corner" rowspan="2">#</th>
+                <th class="sticky1" colspan="3">Flock identity</th>
+                <th colspan="5" class="section-layer">Bird movement</th>
+                <th colspan="4" class="section-production">Production</th>
+                <th colspan="4" class="section-review">Calculated review</th>
+                <th colspan="3">Workflow</th>
+              </tr>
+              <tr class="cols">
+                <th class="sticky1">Farm</th>
+                <th class="sticky2">Shed</th>
+                <th class="sticky3">Flock</th>
+                <th class="col-w-sm">Age</th>
+                <th class="col-w-md">Opening</th>
+                <th class="col-w-sm">Mort.</th>
+                <th class="col-w-sm">Transfers</th>
+                <th class="col-w-md">Closing</th>
+                <th class="col-w-md">Feed kg</th>
+                <th class="col-w-md">Eggs</th>
+                <th class="col-w-md">Rejects</th>
+                <th class="col-w-md">Seconds</th>
+                <th class="col-w-sm">Hen day %</th>
+                <th class="col-w-sm">FCR/doz</th>
+                <th class="col-w-md">Eggs/bird</th>
+                <th class="col-w-lg">Review flag</th>
+                <th class="col-w-lg">Status</th>
+                <th class="col-w-xl">Notes</th>
+                <th class="col-w-lg">Last saved</th>
+              </tr>
+            </thead>
+            <tbody id="grid"></tbody>
+          </table>
+        </div>
+
+        <div class="sheet-footer">
+          <div class="tabs">
+            <button class="tab active">Daily Entry</button>
+            <button class="tab">Weekly Review</button>
+            <button class="tab">Audit Log</button>
+          </div>
+          <div class="legend">
+            <span><i class="dot green"></i>Saved</span>
+            <span><i class="dot amber"></i>Review suggested</span>
+            <span><i class="dot red"></i>Missing</span>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<script>
+const starterRows = [
+ {farm:"Ber Farm 1", shed:"Shed 01", flock:"L2401", age:42.3, opening:38420, mort:12, transfers:0, feed:4820, eggs:35910, rejects:420, seconds:160, notes:"Normal production", last:"08:42"},
+ {farm:"Ber Farm 1", shed:"Shed 02", flock:"L2402", age:39.1, opening:39100, mort:8, transfers:0, feed:6900, eggs:28100, rejects:390, seconds:110, notes:"Feed intake high", last:"08:43"},
+ {farm:"Ber Farm 1", shed:"Shed 03", flock:"L2403", age:31.4, opening:40000, mort:null, transfers:0, feed:null, eggs:null, rejects:null, seconds:null, notes:"", last:"—"},
+ {farm:"Ber Farm 1", shed:"Shed 04", flock:"L2404", age:57.8, opening:37250, mort:22, transfers:0, feed:4675, eggs:33120, rejects:690, seconds:180, notes:"Rejects above normal", last:"08:50"},
+ {farm:"Ber Farm 1", shed:"Shed 05", flock:"L2405", age:28.2, opening:40500, mort:5, transfers:0, feed:4210, eggs:32280, rejects:270, seconds:95, notes:"", last:"08:51"},
+ {farm:"Ber Farm 1", shed:"Shed 06", flock:"L2406", age:64.5, opening:35900, mort:18, transfers:0, feed:4480, eggs:30140, rejects:520, seconds:210, notes:"Older flock", last:"08:52"},
+ {farm:"Ber Farm 1", shed:"Shed 07", flock:"L2407", age:23.7, opening:41000, mort:null, transfers:0, feed:null, eggs:null, rejects:null, seconds:null, notes:"", last:"—"},
+ {farm:"Ber Farm 1", shed:"Shed 08", flock:"L2408", age:46.6, opening:38200, mort:10, transfers:0, feed:4735, eggs:35100, rejects:360, seconds:145, notes:"", last:"08:58"},
+ {farm:"Ber Farm 1", shed:"Shed 09", flock:"L2409", age:51.2, opening:37680, mort:16, transfers:0, feed:4710, eggs:33680, rejects:410, seconds:170, notes:"", last:"09:01"},
+ {farm:"Ber Farm 1", shed:"Shed 10", flock:"L2410", age:35.6, opening:39720, mort:9, transfers:0, feed:4550, eggs:35400, rejects:330, seconds:120, notes:"Good recovery", last:"09:03"},
+ {farm:"Ber Farm 1", shed:"Shed 11", flock:"L2411", age:67.8, opening:34820, mort:24, transfers:0, feed:4460, eggs:27250, rejects:575, seconds:230, notes:"Monitor age decline", last:"09:05"},
+ {farm:"Ber Farm 1", shed:"Shed 12", flock:"L2412", age:21.1, opening:41200, mort:4, transfers:0, feed:3980, eggs:23800, rejects:220, seconds:80, notes:"Coming into lay", last:"09:07"}
+];
+
+let rows = JSON.parse(JSON.stringify(starterRows));
+let activeFilter = "all";
+
+function n(v){ return v === null || v === undefined || Number.isNaN(v) ? null : Number(v); }
+function fmt(v){ return v === null || v === undefined || Number.isNaN(v) ? "—" : Math.round(v).toLocaleString(); }
+function fmt1(v){ return v === null || v === undefined || Number.isNaN(v) ? "—" : Number(v).toFixed(1); }
+function fmt2(v){ return v === null || v === undefined || Number.isNaN(v) ? "—" : Number(v).toFixed(2); }
+function closing(r){ return r.mort === null ? null : r.opening - n(r.mort) + n(r.transfers || 0); }
+function henDay(r){ const c=closing(r); return !c || !r.eggs ? null : (n(r.eggs)/c)*100; }
+function fcr(r){ return !r.feed || !r.eggs ? null : n(r.feed)/(n(r.eggs)/12); }
+function eggsPerBird(r){ const c=closing(r); return !c || !r.eggs ? null : n(r.eggs)/c; }
+function status(r){
+  if(r.mort===null || r.feed===null || r.eggs===null || r.rejects===null) return "missing";
+  const hd=henDay(r), fr=fcr(r);
+  if((hd!==null && (hd<78 || hd>96)) || (fr!==null && fr>1.85) || n(r.rejects)>650 || n(r.feed)>6200) return "review";
+  return "saved";
+}
+function flag(r){
+  const s=status(r);
+  if(s==="missing") return "Data required";
+  const messages=[];
+  const hd=henDay(r), fr=fcr(r);
+  if(hd!==null && hd<78) messages.push("Hen day low");
+  if(hd!==null && hd>96) messages.push("Hen day high");
+  if(fr!==null && fr>1.85) messages.push("FCR high");
+  if(n(r.feed)>6200) messages.push("Feed high");
+  if(n(r.rejects)>650) messages.push("Rejects high");
+  return messages.length ? messages.join(", ") : "Within range";
+}
+function input(i,key,warn=false,text=false){
+  const v=rows[i][key];
+  return `<input class="input-cell ${text?'text':''} ${warn?'warn':''}" value="${v ?? ''}" ${text?'type="text"':'type="number"'} onfocus="focusCell('${key.toUpperCase()}${i+2}','${formulaFor(key)}')" oninput="update(${i},'${key}',this.value)">`;
+}
+function formulaFor(key){
+  const map = {
+    mort:"Closing = Opening - Mortality + Transfers",
+    transfers:"Closing = Opening - Mortality + Transfers",
+    feed:"FCR/dozen = Feed kg ÷ (Eggs ÷ 12)",
+    eggs:"Hen day % = Eggs ÷ Closing birds × 100",
+    rejects:"Review flag triggers when rejects exceed threshold",
+    seconds:"Secondary eggs captured separately from rejects",
+    notes:"Free text note saved with row audit trail"
+  };
+  return map[key] || "Calculated field";
+}
+function focusCell(name, formula){
+  document.getElementById("nameBox").textContent=name;
+  document.getElementById("formulaBar").textContent=formula;
+}
+function update(i,key,value){
+  if(key==="notes"){
+    rows[i][key]=value;
+  } else {
+    rows[i][key]=value==="" ? null : Number(value);
+  }
+  render();
+}
+function render(){
+  const grid=document.getElementById("grid");
+  grid.innerHTML=rows.map((r,i)=>{
+    const s=status(r);
+    const show=activeFilter==="all" || activeFilter===s;
+    const selected=i===1 ? "selected-row" : "";
+    const hd=henDay(r), fr=fcr(r), epb=eggsPerBird(r);
+    const feedWarn=n(r.feed)>6200;
+    const rejectsWarn=n(r.rejects)>650;
+    const hdBad=hd!==null && (hd<78 || hd>96);
+    const fcrBad=fr!==null && fr>1.85;
+    return `
+      <tr class="${selected}" data-status="${s}" style="${show?'':'display:none'}">
+        <td class="rownum">${i+1}</td>
+        <td class="sticky1">${r.farm}</td>
+        <td class="sticky2">${r.shed}</td>
+        <td class="sticky3">${r.flock}</td>
+        <td class="calc-cell">${fmt1(r.age)}</td>
+        <td class="calc-cell">${fmt(r.opening)}</td>
+        <td>${input(i,"mort")}</td>
+        <td>${input(i,"transfers")}</td>
+        <td class="calc-cell">${fmt(closing(r))}</td>
+        <td>${input(i,"feed",feedWarn)}</td>
+        <td>${input(i,"eggs")}</td>
+        <td>${input(i,"rejects",rejectsWarn)}</td>
+        <td>${input(i,"seconds")}</td>
+        <td class="calc-cell ${hdBad?'bad':''}">${fmt1(hd)}${hd!==null?'%':''}</td>
+        <td class="calc-cell ${fcrBad?'bad':''}">${fmt2(fr)}</td>
+        <td class="calc-cell">${fmt2(epb)}</td>
+        <td class="text-cell ${s==='review'?'warn':''}">${flag(r)}</td>
+        <td><div class="status ${s}">${s==="saved"?"Saved":s==="review"?"Review suggested":"Missing"}</div></td>
+        <td>${input(i,"notes",false,true)}</td>
+        <td class="text-cell">${r.last}</td>
+      </tr>`;
+  }).join("");
+  updateKpis();
+}
+function updateKpis(){
+  const statuses=rows.map(status);
+  const completed=statuses.filter(s=>s!=="missing").length;
+  const missing=statuses.filter(s=>s==="missing").length;
+  const review=statuses.filter(s=>s==="review").length;
+  const eggs=rows.reduce((a,r)=>a+(n(r.eggs)||0),0);
+  const hds=rows.map(henDay).filter(v=>v!==null);
+  const fcrs=rows.map(fcr).filter(v=>v!==null);
+  document.getElementById("kpiProgress").textContent=`${completed} / ${rows.length}`;
+  document.getElementById("kpiEggs").textContent=fmt(eggs);
+  document.getElementById("kpiHenDay").textContent=hds.length ? `${fmt1(hds.reduce((a,b)=>a+b,0)/hds.length)}%` : "—";
+  document.getElementById("kpiFcr").textContent=fcrs.length ? fmt2(fcrs.reduce((a,b)=>a+b,0)/fcrs.length) : "—";
+  document.getElementById("kpiReview").textContent=review;
+  document.getElementById("kpiMissing").textContent=missing;
+}
+function copyYesterday(){
+  rows = rows.map(r=>{
+    const feed = r.feed ?? Math.round(r.opening * 0.112);
+    const eggs = r.eggs ?? Math.round(r.opening * 0.82);
+    return {...r, mort:r.mort ?? 0, feed, eggs, rejects:r.rejects ?? Math.round(eggs*.012), seconds:r.seconds ?? 0, last:"Draft"};
+  });
+  activeFilter="all";
+  render();
+}
+function saveAll(){
+  rows = rows.map(r=>({...r,last: status(r)==="missing" ? r.last : "Saved now"}));
+  render();
+}
+function filterStatus(value){
+  activeFilter=value;
+  render();
+}
+function showMissing(){activeFilter="missing";render();}
+function showReview(){activeFilter="review";render();}
+render();
+</script>
+</body>
+</html>

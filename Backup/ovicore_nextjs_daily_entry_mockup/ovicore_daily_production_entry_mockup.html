@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OviCore - Daily Production Entry Mockup</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --panel: #ffffff;
+      --ink: #172033;
+      --muted: #667085;
+      --line: #e5e7eb;
+      --brand: #264f45;
+      --brand2: #1f7a5c;
+      --soft: #eef7f3;
+      --amber: #fff7ed;
+      --amber-border: #fdba74;
+      --red: #fef2f2;
+      --red-border: #fca5a5;
+      --green: #ecfdf3;
+      --green-border: #86efac;
+      --blue: #eff6ff;
+      --shadow: 0 10px 30px rgba(16,24,40,.08);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+    }
+    .app {
+      display: grid;
+      grid-template-columns: 250px minmax(0, 1fr);
+      min-height: 100vh;
+    }
+    aside {
+      background: #12362f;
+      color: white;
+      padding: 22px 16px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+    }
+    .logo {
+      display:flex;
+      align-items:center;
+      gap:10px;
+      margin-bottom: 28px;
+    }
+    .logo-badge {
+      width: 38px; height: 38px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #55c9a3, #f4cf5d);
+      display:flex; align-items:center; justify-content:center;
+      font-weight:800; color:#12362f;
+      box-shadow: inset 0 0 0 2px rgba(255,255,255,.25);
+    }
+    .logo-text { font-size: 22px; font-weight: 800; letter-spacing: -.03em; }
+    .nav-label {
+      color: rgba(255,255,255,.55);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      margin: 24px 10px 8px;
+    }
+    .nav-item {
+      display:flex; align-items:center; gap:10px;
+      padding: 11px 12px;
+      border-radius: 12px;
+      color: rgba(255,255,255,.82);
+      margin-bottom: 4px;
+      font-size: 14px;
+    }
+    .nav-item.active {
+      background: rgba(255,255,255,.14);
+      color: white;
+      box-shadow: inset 3px 0 0 #75e0b5;
+    }
+    .nav-item span:first-child { width: 22px; text-align:center; }
+    main {
+      padding: 22px 28px 40px;
+      overflow: hidden;
+    }
+    .topbar {
+      display:flex; justify-content:space-between; align-items:center;
+      margin-bottom: 20px;
+    }
+    .breadcrumbs {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 5px;
+    }
+    h1 {
+      margin: 0;
+      font-size: 28px;
+      letter-spacing: -.03em;
+    }
+    .user-card {
+      display:flex; align-items:center; gap:12px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 8px 12px 8px 8px;
+      box-shadow: var(--shadow);
+    }
+    .avatar {
+      width: 34px; height:34px; border-radius:50%;
+      background: #d1fae5;
+      color:#065f46;
+      display:flex; align-items:center; justify-content:center;
+      font-weight:700;
+    }
+    .hero {
+      background: linear-gradient(135deg, #1f4d43 0%, #276b57 55%, #e8bf4b 160%);
+      border-radius: 24px;
+      padding: 22px;
+      color: white;
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 18px;
+      box-shadow: var(--shadow);
+      margin-bottom: 18px;
+    }
+    .hero h2 { margin:0 0 6px; font-size:22px; letter-spacing:-.02em; }
+    .hero p { margin: 0; color: rgba(255,255,255,.78); line-height:1.5; }
+    .hero-actions {
+      display:flex; flex-wrap:wrap; justify-content:flex-end; align-content:center; gap:10px;
+    }
+    button, select, input {
+      font: inherit;
+    }
+    .btn {
+      border: 0;
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-weight: 700;
+      cursor: pointer;
+      background: #ffffff;
+      color: #174237;
+      box-shadow: 0 4px 12px rgba(0,0,0,.12);
+    }
+    .btn.secondary {
+      background: rgba(255,255,255,.14);
+      color: white;
+      border: 1px solid rgba(255,255,255,.25);
+      box-shadow: none;
+    }
+    .filters {
+      display:grid;
+      grid-template-columns: repeat(5, minmax(120px, 1fr));
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .field {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 10px 12px;
+      box-shadow: 0 5px 18px rgba(16,24,40,.04);
+    }
+    .field label {
+      display:block;
+      font-size: 11px;
+      text-transform: uppercase;
+      color: var(--muted);
+      letter-spacing: .08em;
+      margin-bottom: 5px;
+      font-weight: 700;
+    }
+    .field select, .field input {
+      width:100%;
+      border:0;
+      outline:0;
+      color: var(--ink);
+      background: transparent;
+      font-weight: 700;
+    }
+    .cards {
+      display:grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .kpi {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 16px;
+      box-shadow: var(--shadow);
+    }
+    .kpi small {
+      color: var(--muted);
+      font-weight: 700;
+      letter-spacing: .02em;
+    }
+    .kpi strong {
+      display:block;
+      font-size: 26px;
+      margin-top: 6px;
+      letter-spacing: -.03em;
+    }
+    .kpi .hint { color: var(--muted); font-size: 13px; margin-top: 5px; }
+    .table-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+    .table-header {
+      display:flex; justify-content:space-between; align-items:center;
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--line);
+    }
+    .table-header h3 { margin: 0; font-size: 18px; }
+    .pill-row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    .pill {
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      border: 1px solid var(--line);
+      background:#fff;
+      color:#344054;
+    }
+    .pill.green { background:var(--green); border-color:var(--green-border); color:#166534; }
+    .pill.amber { background:var(--amber); border-color:var(--amber-border); color:#9a3412; }
+    .pill.red { background:var(--red); border-color:var(--red-border); color:#991b1b; }
+    .table-wrap {
+      overflow:auto;
+      max-height: 560px;
+    }
+    table {
+      border-collapse: separate;
+      border-spacing: 0;
+      width: 1500px;
+      font-size: 13px;
+    }
+    thead th {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background:#f8fafc;
+      color:#475467;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing:.06em;
+      text-align:left;
+      padding: 11px 9px;
+      border-bottom:1px solid var(--line);
+      white-space: nowrap;
+    }
+    tbody td {
+      border-bottom:1px solid #eef0f3;
+      padding: 7px 9px;
+      vertical-align: middle;
+      background:#fff;
+    }
+    tbody tr:hover td { background:#fbfdfc; }
+    .sticky-col {
+      position: sticky;
+      left: 0;
+      z-index:1;
+      box-shadow: 8px 0 14px rgba(16,24,40,.04);
+    }
+    thead .sticky-col { z-index: 3; background:#f8fafc; }
+    td.sticky-col { background:#fff; }
+    .shed-name { font-weight: 800; }
+    .sub { color:var(--muted); font-size: 12px; margin-top:2px; }
+    .cell-input {
+      width: 92px;
+      border: 1px solid #d0d5dd;
+      border-radius: 10px;
+      padding: 8px 8px;
+      outline: none;
+      background:#fff;
+      text-align:right;
+      font-weight: 650;
+    }
+    .cell-input.notes {
+      width: 180px;
+      text-align:left;
+    }
+    .cell-input:focus {
+      border-color:#1f7a5c;
+      box-shadow: 0 0 0 3px rgba(31,122,92,.14);
+    }
+    .calc {
+      font-weight: 800;
+      color:#1d2939;
+      text-align:right;
+      white-space:nowrap;
+    }
+    .warning-cell input { background: var(--amber); border-color: var(--amber-border); }
+    .missing-cell input { background: var(--red); border-color: var(--red-border); }
+    .row-status {
+      display:inline-flex; align-items:center; gap:6px;
+      border-radius:999px;
+      padding: 5px 9px;
+      font-size:12px; font-weight:800;
+      white-space: nowrap;
+    }
+    .status-saved { background:var(--green); color:#166534; border:1px solid var(--green-border); }
+    .status-review { background:var(--amber); color:#9a3412; border:1px solid var(--amber-border); }
+    .status-missing { background:var(--red); color:#991b1b; border:1px solid var(--red-border); }
+    .footer-bar {
+      display:flex; justify-content:space-between; align-items:center;
+      padding: 14px 18px;
+      background:#fbfcfd;
+      border-top:1px solid var(--line);
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .footer-note {
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .save-row {
+      background:#174237;
+      color:#fff;
+      border:0;
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-weight: 800;
+      cursor:pointer;
+    }
+    .ghost {
+      background:#fff;
+      color:#174237;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-weight: 800;
+      cursor:pointer;
+    }
+    .mobile-cards {
+      display:none;
+      gap:12px;
+      flex-direction:column;
+    }
+    .mob-card {
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:14px;
+      box-shadow: var(--shadow);
+    }
+    .mob-head {
+      display:flex; justify-content:space-between; gap:10px; align-items:flex-start;
+      margin-bottom:10px;
+    }
+    .mob-grid {
+      display:grid; grid-template-columns: 1fr 1fr; gap:10px;
+    }
+    @media (max-width: 1100px) {
+      .app { grid-template-columns: 82px minmax(0,1fr); }
+      .logo-text, .nav-item span:last-child, .nav-label { display:none; }
+      aside { padding: 18px 12px; }
+      .nav-item { justify-content:center; }
+      .hero { grid-template-columns: 1fr; }
+      .hero-actions { justify-content:flex-start; }
+      .filters { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .cards { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    }
+    @media (max-width: 720px) {
+      .app { display:block; }
+      aside { display:none; }
+      main { padding: 16px; }
+      .topbar { align-items:flex-start; gap:12px; }
+      .user-card { display:none; }
+      .filters, .cards { grid-template-columns: 1fr; }
+      .table-wrap { display:none; }
+      .mobile-cards { display:flex; padding: 12px; }
+      .table-header { flex-direction:column; align-items:flex-start; gap:10px; }
+      .footer-bar { align-items:flex-start; }
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside>
+    <div class="logo">
+      <div class="logo-badge">O</div>
+      <div class="logo-text">OviCore</div>
+    </div>
+    <div class="nav-label">Production</div>
+    <div class="nav-item active"><span>▦</span><span>Daily Entry</span></div>
+    <div class="nav-item"><span>◷</span><span>Weekly Review</span></div>
+    <div class="nav-item"><span>☰</span><span>Flocks</span></div>
+    <div class="nav-label">Planning</div>
+    <div class="nav-item"><span>◇</span><span>Planner</span></div>
+    <div class="nav-item"><span>↗</span><span>Transfers</span></div>
+    <div class="nav-label">Insights</div>
+    <div class="nav-item"><span>⌁</span><span>Graphs</span></div>
+    <div class="nav-item"><span>☑</span><span>Manager Briefing</span></div>
+    <div class="nav-label">Admin</div>
+    <div class="nav-item"><span>⚙</span><span>Company Setup</span></div>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <div>
+        <div class="breadcrumbs">OviCore / Production / Daily Production Entry</div>
+        <h1>Daily Production Entry</h1>
+      </div>
+      <div class="user-card">
+        <div class="avatar">JJ</div>
+        <div>
+          <div style="font-weight:800;">JJ Maritz</div>
+          <div style="font-size:12px;color:var(--muted);">Production Admin</div>
+        </div>
+      </div>
+    </div>
+
+    <section class="hero">
+      <div>
+        <h2>Today’s layer production workflow</h2>
+        <p>Enter daily production by shed. Opening birds auto-flow from yesterday, closing birds calculate live, and rows are flagged as saved, missing, or review suggested.</p>
+      </div>
+      <div class="hero-actions">
+        <button class="btn secondary" onclick="copyYesterday()">Copy yesterday</button>
+        <button class="btn secondary" onclick="showMissingOnly()">Show missing only</button>
+        <button class="btn" onclick="saveAll()">Save completed rows</button>
+      </div>
+    </section>
+
+    <section class="filters">
+      <div class="field">
+        <label>Company</label>
+        <select><option>Pace Farms</option><option>Demo Company</option></select>
+      </div>
+      <div class="field">
+        <label>Farm</label>
+        <select><option>Beresfield Farm 1</option><option>Hanwood Farm 2</option><option>Kinglake Farm</option></select>
+      </div>
+      <div class="field">
+        <label>Entry date</label>
+        <input type="date" value="2026-06-19"/>
+      </div>
+      <div class="field">
+        <label>Week ending</label>
+        <input type="text" value="Sunday, 21 Jun 2026" readonly/>
+      </div>
+      <div class="field">
+        <label>View</label>
+        <select><option>All active sheds</option><option>Missing only</option><option>Needs review</option><option>Saved only</option></select>
+      </div>
+    </section>
+
+    <section class="cards">
+      <div class="kpi">
+        <small>Entry progress</small>
+        <strong id="progress">5 / 8</strong>
+        <div class="hint">Rows completed today</div>
+      </div>
+      <div class="kpi">
+        <small>Total eggs</small>
+        <strong id="totalEggs">244,850</strong>
+        <div class="hint">Across visible sheds</div>
+      </div>
+      <div class="kpi">
+        <small>Avg hen day</small>
+        <strong id="avgHenDay">89.6%</strong>
+        <div class="hint">Calculated live</div>
+      </div>
+      <div class="kpi">
+        <small>Review suggested</small>
+        <strong id="reviewCount">2</strong>
+        <div class="hint">Support opportunity</div>
+      </div>
+    </section>
+
+    <section class="table-card">
+      <div class="table-header">
+        <div>
+          <h3>Beresfield Farm 1 — active sheds</h3>
+          <div style="font-size:13px;color:var(--muted);margin-top:3px;">Frozen shed/flock columns, live calculations, row-level status.</div>
+        </div>
+        <div class="pill-row">
+          <span class="pill green">Saved</span>
+          <span class="pill amber">Review suggested</span>
+          <span class="pill red">Missing</span>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th class="sticky-col">Shed / Flock</th>
+              <th>Age</th>
+              <th>Opening birds</th>
+              <th>Mortality</th>
+              <th>Transfers</th>
+              <th>Closing birds</th>
+              <th>Feed kg</th>
+              <th>Eggs</th>
+              <th>Rejects</th>
+              <th>Hen day %</th>
+              <th>FCR / dozen</th>
+              <th>Notes</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="entryBody"></tbody>
+        </table>
+      </div>
+
+      <div class="mobile-cards" id="mobileCards"></div>
+
+      <div class="footer-bar">
+        <div class="footer-note">
+          Next.js version idea: each row can save independently, calculate instantly, and show supportive validation before final review.
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="ghost" onclick="resetDemo()">Reset demo</button>
+          <button class="save-row" onclick="saveAll()">Save all completed rows</button>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+const initialRows = [
+  {shed:"Shed 1", flock:"L2401", age:42.3, opening:38420, mort:12, transfers:0, feed:4820, eggs:35910, rejects:420, notes:"Normal", status:"saved"},
+  {shed:"Shed 2", flock:"L2402", age:39.1, opening:39100, mort:8, transfers:0, feed:6900, eggs:28100, rejects:390, notes:"Feed intake high", status:"review"},
+  {shed:"Shed 3", flock:"L2403", age:31.4, opening:40000, mort:null, transfers:0, feed:null, eggs:null, rejects:null, notes:"", status:"missing"},
+  {shed:"Shed 4", flock:"L2404", age:57.8, opening:37250, mort:22, transfers:0, feed:4675, eggs:33120, rejects:690, notes:"Watch rejects", status:"review"},
+  {shed:"Shed 5", flock:"L2405", age:28.2, opening:40500, mort:5, transfers:0, feed:4210, eggs:32280, rejects:270, notes:"", status:"saved"},
+  {shed:"Shed 6", flock:"L2406", age:64.5, opening:35900, mort:18, transfers:0, feed:4480, eggs:30140, rejects:520, notes:"Older flock", status:"saved"},
+  {shed:"Shed 7", flock:"L2407", age:23.7, opening:41000, mort:null, transfers:0, feed:null, eggs:null, rejects:null, notes:"", status:"missing"},
+  {shed:"Shed 8", flock:"L2408", age:46.6, opening:38200, mort:10, transfers:0, feed:4735, eggs:35100, rejects:360, notes:"", status:"saved"}
+];
+
+let rows = JSON.parse(JSON.stringify(initialRows));
+
+function fmt(n) {
+  if (n === null || n === undefined || Number.isNaN(n)) return "—";
+  return Math.round(n).toLocaleString();
+}
+function pct(n) {
+  if (n === null || n === undefined || Number.isNaN(n)) return "—";
+  return n.toFixed(1) + "%";
+}
+function fcr(n) {
+  if (n === null || n === undefined || Number.isNaN(n)) return "—";
+  return n.toFixed(2);
+}
+function closing(row) {
+  if (row.mort === null || row.mort === undefined) return null;
+  return row.opening - Number(row.mort || 0) + Number(row.transfers || 0);
+}
+function henDay(row) {
+  const close = closing(row);
+  if (!close || !row.eggs) return null;
+  return (Number(row.eggs) / close) * 100;
+}
+function fcrDozen(row) {
+  if (!row.feed || !row.eggs) return null;
+  return Number(row.feed) / (Number(row.eggs) / 12);
+}
+function rowStatus(row) {
+  if (row.mort === null || row.feed === null || row.eggs === null || row.rejects === null) return "missing";
+  const hd = henDay(row);
+  const fcr = fcrDozen(row);
+  if ((hd !== null && (hd < 82 || hd > 96)) || (fcr !== null && fcr > 1.85) || Number(row.rejects) > 600) return "review";
+  return row.status === "saved" ? "saved" : "saved";
+}
+function statusLabel(status) {
+  if (status === "saved") return "✓ Saved";
+  if (status === "review") return "◇ Review suggested";
+  return "○ Missing";
+}
+function statusClass(status) {
+  if (status === "saved") return "status-saved";
+  if (status === "review") return "status-review";
+  return "status-missing";
+}
+function inputCell(i, key, widthClass="") {
+  const value = rows[i][key];
+  const status = rowStatus(rows[i]);
+  const danger = value === null ? "missing-cell" : "";
+  return `<td class="${danger}"><input class="cell-input ${widthClass}" type="${key === 'notes' ? 'text' : 'number'}" value="${value ?? ""}" oninput="updateCell(${i}, '${key}', this.value)" /></td>`;
+}
+function render() {
+  const body = document.getElementById("entryBody");
+  body.innerHTML = rows.map((row, i) => {
+    const stat = rowStatus(row);
+    const hd = henDay(row);
+    const fcrv = fcrDozen(row);
+    const feedWarn = row.feed && row.feed > 6200 ? "warning-cell" : "";
+    const rejectsWarn = row.rejects && row.rejects > 600 ? "warning-cell" : "";
+    return `
+      <tr data-status="${stat}">
+        <td class="sticky-col">
+          <div class="shed-name">${row.shed}</div>
+          <div class="sub">${row.flock}</div>
+        </td>
+        <td><strong>${row.age.toFixed(1)}</strong><div class="sub">weeks</div></td>
+        <td class="calc">${fmt(row.opening)}</td>
+        ${inputCell(i, "mort")}
+        ${inputCell(i, "transfers")}
+        <td class="calc">${fmt(closing(row))}</td>
+        <td class="${feedWarn}"><input class="cell-input" type="number" value="${row.feed ?? ""}" oninput="updateCell(${i}, 'feed', this.value)" /></td>
+        ${inputCell(i, "eggs")}
+        <td class="${rejectsWarn}"><input class="cell-input" type="number" value="${row.rejects ?? ""}" oninput="updateCell(${i}, 'rejects', this.value)" /></td>
+        <td class="calc">${pct(hd)}</td>
+        <td class="calc">${fcr(fcrv)}</td>
+        <td><input class="cell-input notes" type="text" value="${row.notes ?? ""}" oninput="updateCell(${i}, 'notes', this.value)" /></td>
+        <td><span class="row-status ${statusClass(stat)}">${statusLabel(stat)}</span></td>
+        <td><button class="save-row" onclick="saveRow(${i})">Save row</button></td>
+      </tr>
+    `;
+  }).join("");
+
+  const mobile = document.getElementById("mobileCards");
+  mobile.innerHTML = rows.map((row, i) => {
+    const stat = rowStatus(row);
+    return `
+      <div class="mob-card" data-status="${stat}">
+        <div class="mob-head">
+          <div>
+            <div class="shed-name">${row.shed} — ${row.flock}</div>
+            <div class="sub">Age ${row.age.toFixed(1)} weeks</div>
+          </div>
+          <span class="row-status ${statusClass(stat)}">${statusLabel(stat)}</span>
+        </div>
+        <div class="mob-grid">
+          <div class="field"><label>Opening</label><input value="${fmt(row.opening)}" readonly></div>
+          <div class="field"><label>Mortality</label><input type="number" value="${row.mort ?? ""}" oninput="updateCell(${i}, 'mort', this.value)"></div>
+          <div class="field"><label>Closing</label><input value="${fmt(closing(row))}" readonly></div>
+          <div class="field"><label>Feed kg</label><input type="number" value="${row.feed ?? ""}" oninput="updateCell(${i}, 'feed', this.value)"></div>
+          <div class="field"><label>Eggs</label><input type="number" value="${row.eggs ?? ""}" oninput="updateCell(${i}, 'eggs', this.value)"></div>
+          <div class="field"><label>Hen day</label><input value="${pct(henDay(row))}" readonly></div>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  updateKpis();
+}
+function updateCell(i, key, value) {
+  if (key === "notes") rows[i][key] = value;
+  else rows[i][key] = value === "" ? null : Number(value);
+  render();
+}
+function saveRow(i) {
+  const stat = rowStatus(rows[i]);
+  rows[i].status = stat === "missing" ? "missing" : "saved";
+  render();
+}
+function saveAll() {
+  rows.forEach((r, i) => {
+    const stat = rowStatus(r);
+    if (stat !== "missing") r.status = "saved";
+  });
+  render();
+}
+function copyYesterday() {
+  rows.forEach(r => {
+    if (r.mort === null) r.mort = 0;
+    if (r.feed === null) r.feed = Math.round(r.opening * 0.115);
+    if (r.eggs === null) r.eggs = Math.round(r.opening * 0.82);
+    if (r.rejects === null) r.rejects = Math.round(r.eggs * 0.012);
+  });
+  render();
+}
+function showMissingOnly() {
+  const trs = document.querySelectorAll("tr[data-status], .mob-card[data-status]");
+  trs.forEach(el => {
+    el.style.display = el.dataset.status === "missing" ? "" : "none";
+  });
+}
+function resetDemo() {
+  rows = JSON.parse(JSON.stringify(initialRows));
+  render();
+}
+function updateKpis() {
+  const statuses = rows.map(rowStatus);
+  const completed = statuses.filter(s => s !== "missing").length;
+  const review = statuses.filter(s => s === "review").length;
+  const totalEggs = rows.reduce((s,r) => s + (Number(r.eggs)||0), 0);
+  const hdValues = rows.map(henDay).filter(v => v !== null);
+  const avg = hdValues.length ? hdValues.reduce((a,b)=>a+b,0)/hdValues.length : 0;
+  document.getElementById("progress").textContent = `${completed} / ${rows.length}`;
+  document.getElementById("totalEggs").textContent = fmt(totalEggs);
+  document.getElementById("avgHenDay").textContent = pct(avg);
+  document.getElementById("reviewCount").textContent = review;
+}
+render();
+</script>
+</body>
+</html>

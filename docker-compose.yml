@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: ovicore_next_postgres
+    environment:
+      POSTGRES_USER: ovicore
+      POSTGRES_PASSWORD: ovicore_dev_password
+      POSTGRES_DB: ovicore_next
+    ports:
+      - "5432:5432"
+    volumes:
+      - ovicore_pgdata:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/001_schema.sql
+
+volumes:
+  ovicore_pgdata:

@@ -1,0 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --ovicore-emerald: #0F3D35;
+  --ovicore-green: #1F8F68;
+  --ovicore-mint: #E8F8F1;
+  --ovicore-gold: #E5B64C;
+  --ovicore-mist: #F6F8FB;
+}
+
+body {
+  background: linear-gradient(135deg, #eef3f6, #f8fafc 55%, #edf6f1);
+  color: #0F172A;
+}
