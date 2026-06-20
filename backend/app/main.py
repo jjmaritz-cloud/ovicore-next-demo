@@ -18,7 +18,7 @@ app.add_middleware(
         "https://ovicore-next-demo-pmf6lq8omc-ovi-core.vercel.app",
         "https://demo.ovicore.com.au",
         "https://app.ovicore.com.au",
-    ],
+    ]
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
