@@ -86,13 +86,13 @@ export default function BirdMovementPlannerPage() {
 	const [showLifecycleBoard, setShowLifecycleBoard] = useState(true);
 
   async function refreshPlans(selectId?: number) {
-		const plansData = await getBreederFlockPlans();
+		const plansData: Plan[] = await getBreederFlockPlans();
 		setPlans(plansData);
 
 		if (!lockedTimelineStart && plansData.length) {
 			const earliestPlacement = plansData
-				.map((plan) => new Date(plan.placement_date))
-				.sort((a, b) => a.getTime() - b.getTime())[0];
+				.map((plan: Plan) => new Date(plan.placement_date))
+				.sort((a: Date, b: Date) => a.getTime() - b.getTime())[0];
 
 			setLockedTimelineStart(startOfWeek(earliestPlacement));
 		}
